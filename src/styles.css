@@ -1,0 +1,23 @@
+:root { --brand: #5b4bff; --bg: #f7f7fb; --fg: #16161d; --muted: #6b6b7b; --line: #e3e3ec; --err: #c62828; font-family: Inter, system-ui, sans-serif; color: var(--fg); background: var(--bg); }
+body { margin: 0; }
+.app { max-width: 980px; margin: 0 auto; padding: 0 20px 40px; }
+header { display: flex; align-items: center; gap: 12px; padding: 16px 0; border-bottom: 1px solid var(--line); }
+header h1 { font-size: 18px; margin: 0; } header h1 span { font-weight: 400; color: var(--muted); }
+.mock { background: #ffb020; color: #000; font-weight: 700; font-size: 12px; padding: 2px 8px; border-radius: 4px; }
+nav { margin-left: auto; display: flex; gap: 4px; }
+button { font: inherit; border: 1px solid var(--line); background: #fff; padding: 6px 14px; border-radius: 6px; cursor: pointer; }
+button.active, main > section > button { background: var(--brand); color: #fff; border-color: var(--brand); }
+button:disabled { opacity: .5; cursor: default; } button.small { padding: 2px 8px; font-size: 12px; } button.danger { color: var(--err); }
+select, textarea { font: inherit; width: 100%; box-sizing: border-box; padding: 8px; border: 1px solid var(--line); border-radius: 6px; margin-bottom: 8px; }
+.muted { color: var(--muted); font-size: 14px; }
+.output, pre, .error, .notice { background: #fff; border: 1px solid var(--line); border-radius: 6px; padding: 12px; margin-top: 12px; overflow-x: auto; }
+pre { font-size: 12px; white-space: pre-wrap; }
+.stream { white-space: pre-wrap; line-height: 1.5; margin-top: 8px; }
+.l-tool, .l-status { color: var(--muted); font-size: 12px; } .l-citation { color: var(--brand); font-size: 13px; }
+.error { border-color: var(--err); color: var(--err); } .error pre { color: var(--fg); }
+.notice { border-color: #ffb020; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; } th, td { text-align: left; padding: 6px; border-bottom: 1px solid var(--line); }
+.badge { font-size: 11px; padding: 1px 6px; border-radius: 10px; background: #eee; } .badge.published, .badge.done { background: #d7f5dd; } .badge.error { background: #fdd; } .badge.running, .badge.in_review { background: #fff1c2; }
+.chips { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; } .chip { background: #fff; border: 1px solid var(--line); padding: 3px 10px; border-radius: 12px; font-size: 13px; } .chip.write { border-color: #ffb020; background: #fff8e6; }
+dl { display: grid; grid-template-columns: 120px 1fr; gap: 6px; } dt { color: var(--muted); }
+footer { margin-top: 40px; color: var(--muted); font-size: 13px; }
