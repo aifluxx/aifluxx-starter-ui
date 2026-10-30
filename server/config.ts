@@ -49,7 +49,7 @@ function readCredentials(env: NodeJS.ProcessEnv): { url?: string; api_key?: stri
   }
 }
 
-/** CLI `aifluxx login --platform dev` stores a host whose first label is `dev`. */
+/** A credentials host whose first label is `dev.`, such as `dev.aifluxx.co.za`. */
 function isDevApiUrl(url: string): boolean {
   const normalized = normalizeApiRoot(url);
   if (!normalized) return false;

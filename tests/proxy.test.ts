@@ -47,16 +47,16 @@ describe("config", () => {
     expect(c.mcpUrl.endsWith("/mcp/")).toBe(true);
   });
   it("uses AIFLUXX_API_URL and derives MCP from that root", () => {
-    const c = loadConfig({ ...credsEnv("https://dev.developer.aifluxx.co.za"), AIFLUXX_API_URL: "https://staging.example/", AIFLUXX_API_KEY: "afx_dev_envkey_abcd" }, "/nonexistent");
+    const c = loadConfig({ ...credsEnv("https://dev.aifluxx.co.za"), AIFLUXX_API_URL: "https://staging.example/", AIFLUXX_API_KEY: "afx_dev_envkey_abcd" }, "/nonexistent");
     expect(c.apiRoot).toBe("https://staging.example");
     expect(c.mcpUrl).toBe("https://staging.example/mcp/");
     expect(c.keySource).toBe("env");
   });
   it("follows a dev URL from the CLI credentials file", () => {
-    const c = loadConfig(credsEnv("https://dev.developer.aifluxx.co.za/"), "/nonexistent");
+    const c = loadConfig(credsEnv("https://dev.aifluxx.co.za/"), "/nonexistent");
     expect(c.mock).toBe(false);
-    expect(c.apiRoot).toBe("https://dev.developer.aifluxx.co.za");
-    expect(c.mcpUrl).toBe("https://dev.developer.aifluxx.co.za/mcp/");
+    expect(c.apiRoot).toBe("https://dev.aifluxx.co.za");
+    expect(c.mcpUrl).toBe("https://dev.aifluxx.co.za/mcp/");
     expect(c.keySource).toBe("credentials");
   });
   it("keeps prod when the saved URL is not dev, including when the key comes from that file", () => {
@@ -66,9 +66,9 @@ describe("config", () => {
     expect(c.keySource).toBe("credentials");
   });
   it("uses a dev credentials URL even when the key comes from the environment", () => {
-    const c = loadConfig({ ...credsEnv("https://dev.developer.aifluxx.co.za", "afx_dev_filekey_zzzz"), AIFLUXX_API_KEY: "afx_dev_envkey_abcd" }, "/nonexistent");
-    expect(c.apiRoot).toBe("https://dev.developer.aifluxx.co.za");
-    expect(c.mcpUrl).toBe("https://dev.developer.aifluxx.co.za/mcp/");
+    const c = loadConfig({ ...credsEnv("https://dev.aifluxx.co.za", "afx_dev_filekey_zzzz"), AIFLUXX_API_KEY: "afx_dev_envkey_abcd" }, "/nonexistent");
+    expect(c.apiRoot).toBe("https://dev.aifluxx.co.za");
+    expect(c.mcpUrl).toBe("https://dev.aifluxx.co.za/mcp/");
     expect(c.keySource).toBe("env");
   });
   it("reads AIFLUXX_API_URL and MCP_URL from .env.local", () => {
