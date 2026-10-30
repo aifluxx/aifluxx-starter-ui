@@ -1,10 +1,26 @@
 import { describe, expect, it } from "vitest";
 import { createApp } from "../server/app";
 import { isAllowed } from "../server/allowlist";
-import { loadConfig, maskKey, parseDotenv, type ProxyConfig } from "../server/config";
+import { mkdtempSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { DEFAULT_API_ROOT, deriveMcpUrl, loadConfig, maskKey, parseDotenv, type ProxyConfig } from "../server/config";
 
 const V = "11111111-1111-4111-8111-111111111111";
-const live: ProxyConfig = { mock: false, apiRoot: "https://api.example.com", apiKey: "afx_dev_testkey_abcd", keySource: "env" };
+const live: ProxyConfig = {
+  mock: false,
+  apiRoot: "https://api.example.com",
+  mcpUrl: "https://api.example.com/mcp/",
+  apiKey: "afx_dev_testkey_abcd",
+  keySource: "env",
+};
+
+function credsEnv(url: string, key = "afx_dev_fromfile_zzzz"): NodeJS.ProcessEnv {
+  const dir = mkdtempSync(join(tmpdir(), "aifluxx-creds-"));
+  const path = join(dir, "credentials");
+  writeFileSync(path, JSON.stringify({ url, api_key: key }));
+  return { AIFLUXX_CREDENTIALS: path };
+}
 
 describe("allow-list", () => {
   it("allows public dev routes", () => {
@@ -21,10 +37,53 @@ describe("allow-list", () => {
 });
 
 describe("config", () => {
-  it("defaults to mock with no key", () => {
-    const c = loadConfig({ AIFLUXX_CREDENTIALS: "/nonexistent" } as NodeJS.ProcessEnv, "/nonexistent");
+  const absent = { AIFLUXX_CREDENTIALS: "/nonexistent" } as NodeJS.ProcessEnv;
+  it("defaults to mock with no key and derives MCP from prod", () => {
+    const c = loadConfig(absent, "/nonexistent");
     expect(c.mock).toBe(true);
     expect(c.apiKey).toBeNull();
+    expect(c.apiRoot).toBe(DEFAULT_API_ROOT);
+    expect(c.mcpUrl).toBe(deriveMcpUrl(DEFAULT_API_ROOT));
+    expect(c.mcpUrl.endsWith("/mcp/")).toBe(true);
+  });
+  it("uses AIFLUXX_API_URL and derives MCP from that root", () => {
+    const c = loadConfig({ ...credsEnv("https://dev.developer.aifluxx.co.za"), AIFLUXX_API_URL: "https://staging.example/", AIFLUXX_API_KEY: "afx_dev_envkey_abcd" }, "/nonexistent");
+    expect(c.apiRoot).toBe("https://staging.example");
+    expect(c.mcpUrl).toBe("https://staging.example/mcp/");
+    expect(c.keySource).toBe("env");
+  });
+  it("follows a dev URL from the CLI credentials file", () => {
+    const c = loadConfig(credsEnv("https://dev.developer.aifluxx.co.za/"), "/nonexistent");
+    expect(c.mock).toBe(false);
+    expect(c.apiRoot).toBe("https://dev.developer.aifluxx.co.za");
+    expect(c.mcpUrl).toBe("https://dev.developer.aifluxx.co.za/mcp/");
+    expect(c.keySource).toBe("credentials");
+  });
+  it("keeps prod when the saved URL is not dev, including when the key comes from that file", () => {
+    const c = loadConfig(credsEnv("https://developer.aifluxx.co.za"), "/nonexistent");
+    expect(c.apiRoot).toBe(DEFAULT_API_ROOT);
+    expect(c.mcpUrl).toBe(deriveMcpUrl(DEFAULT_API_ROOT));
+    expect(c.keySource).toBe("credentials");
+  });
+  it("uses a dev credentials URL even when the key comes from the environment", () => {
+    const c = loadConfig({ ...credsEnv("https://dev.developer.aifluxx.co.za", "afx_dev_filekey_zzzz"), AIFLUXX_API_KEY: "afx_dev_envkey_abcd" }, "/nonexistent");
+    expect(c.apiRoot).toBe("https://dev.developer.aifluxx.co.za");
+    expect(c.mcpUrl).toBe("https://dev.developer.aifluxx.co.za/mcp/");
+    expect(c.keySource).toBe("env");
+  });
+  it("reads AIFLUXX_API_URL and MCP_URL from .env.local", () => {
+    const dir = mkdtempSync(join(tmpdir(), "aifluxx-env-"));
+    writeFileSync(join(dir, ".env.local"), "AIFLUXX_API_URL=https://from-file.example\nAIFLUXX_API_KEY=afx_dev_localkey_wxyz\nMCP_URL=https://mcp.from-file.example/mcp/\n");
+    const c = loadConfig(absent, dir);
+    expect(c.apiRoot).toBe("https://from-file.example");
+    expect(c.mcpUrl).toBe("https://mcp.from-file.example/mcp/");
+    expect(c.keySource).toBe(".env.local");
+  });
+  it("lets MCP_URL override the derived endpoint", () => {
+    const c = loadConfig({ ...absent, AIFLUXX_API_URL: "https://api.example.com", AIFLUXX_API_KEY: "afx_dev_envkey_abcd", MCP_URL: "https://mcp.example.com/custom" }, "/nonexistent");
+    expect(c.apiRoot).toBe("https://api.example.com");
+    expect(c.mcpUrl).toBe("https://mcp.example.com/custom/");
+    expect(c.mcpUrl).not.toContain("api.aifluxx.co.za");
   });
   it("masks keys and parses dotenv", () => {
     expect(maskKey("afx_dev_secretvalue1234")).toBe("afx_dev_…1234");
@@ -44,6 +103,8 @@ describe("proxy", () => {
     expect(seen?.redirect).toBe("manual");
     const cfg = await (await app.request("/local/config")).text();
     expect(cfg).not.toContain("testkey");
+    expect(cfg).toContain("https://api.example.com/mcp/");
+    expect(cfg).not.toContain("https://api.aifluxx.co.za/mcp");
   });
   it("blocks redirects and flags http downgrades", async () => {
     const app = createApp({ config: live, fetchImpl: (async () => new Response(null, { status: 307, headers: { location: "http://api.example.com/mcp" } })) as never });

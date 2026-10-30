@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { parse as parseYaml } from "yaml";
 import { isAllowed } from "./allowlist.js";
 import { classifyTools, CONNECTORS, publicToolId } from "./catalog.js";
-import { maskKey, MCP_URL, type ProxyConfig } from "./config.js";
+import { maskKey, type ProxyConfig } from "./config.js";
 import { MOCK_AGENTS, MOCK_KEYS, MOCK_ME, MOCK_RUN_LINES, MOCK_SPEC } from "./fixtures.js";
 
 export interface AppOptions {
@@ -25,7 +25,7 @@ export function createApp({ config, fetchImpl = fetch, specPath, mockDelayMs = 2
       apiRoot: config.mock ? null : config.apiRoot,
       keyMasked: config.mock ? null : maskKey(config.apiKey),
       keySource: config.mock ? null : config.keySource,
-      mcpUrl: MCP_URL,
+      mcpUrl: config.mcpUrl,
     }),
   );
 
