@@ -29,7 +29,9 @@ Any one of these works (first match wins):
 2. `cp .env.example .env.local` and set `AIFLUXX_API_KEY=afx_dev_…`.
 3. `AIFLUXX_API_KEY=afx_dev_… npm run dev`.
 
-Restart `npm run dev`, then open **Settings** to check the key against `/api/dev/me`. Optional `AIFLUXX_API_URL` overrides the API root (default `https://api.aifluxx.co.za`).
+Restart `npm run dev`, then open **Settings** to check the key against `/api/dev/me`.
+
+The API root defaults to `https://api.aifluxx.co.za`. `AIFLUXX_API_URL` (environment or `.env.local`) replaces that when it is set. When it is unset, the proxy uses the URL in `~/.aifluxx/credentials` when the host starts with `dev.`, for example `https://dev.aifluxx.co.za` (`/api/dev/tools` and `/mcp/` are served there). A production or other saved URL leaves the default in place. The MCP endpoint is that API root plus `/mcp/`, including the trailing slash. Set `MCP_URL` to use a different MCP endpoint.
 
 To see your agent's tools, put its `spec.yaml` in the project root (or run from your package directory).
 

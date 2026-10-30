@@ -41,7 +41,7 @@ export function Settings({ cfg }: { cfg: LocalConfig }) {
       <h2>Settings</h2>
       <dl>
         <dt>Mode</dt><dd>{cfg.mock ? "Mock (fixtures, no network)" : "Live"}</dd>
-        <dt>API root</dt><dd><code>{cfg.apiRoot ?? "—"}</code> <span className="muted">(set AIFLUXX_API_URL and restart to change)</span></dd>
+        <dt>API root</dt><dd><code>{cfg.apiRoot ?? "—"}</code> <span className="muted">(AIFLUXX_API_URL, or a dev URL from aifluxx login; restart to change)</span></dd>
         <dt>Key</dt><dd>{cfg.keyMasked ? <><code>{cfg.keyMasked}</code> from {cfg.keySource}</> : "none (mock)"} · {me ? <span className="badge published">valid</span> : err ? <span className="badge error">invalid</span> : "checking…"} <button className="small" onClick={check}>Check</button></dd>
         {me && <><dt>Signed in as</dt><dd>{String(me.email ?? me.name ?? "")}</dd></>}
       </dl>
