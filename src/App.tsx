@@ -34,20 +34,30 @@ export function App() {
 
   return (
     <div className="app">
-      <header>
-        <img src="/logo.svg" alt="" width={28} height={28} />
-        <h1>AIFluxx <span>Starter Console</span></h1>
-        {cfg?.mock && <span className="mock">MOCK</span>}
-        <nav>{TABS.map((t) => <button key={t} className={t === tab ? "active" : ""} onClick={() => setTab(t)}>{t}</button>)}</nav>
-      </header>
-      <main>
-        {!cfg && <div className="error">Local proxy not reachable. Start it with <code>npm run dev</code>.</div>}
-        {tab === "Run" && <RunConsole agents={agents} runs={runs} onRun={onRun} mock={!!cfg?.mock} />}
-        {tab === "Status" && <Status agents={agents} runs={runs} error={agentsErr} reload={loadAgents} />}
-        {tab === "Tools" && <Tools />}
-        {tab === "Settings" && cfg && <Settings cfg={cfg} />}
-      </main>
-      <footer>AIFluxx Starter Console v0.1 · Questions: <a href="mailto:developer@aifluxx.com">developer@aifluxx.com</a></footer>
+      <aside className="sidebar">
+        <div className="brand">
+          <img src="/brand/aifluxx-horizontal-dark.svg" alt="AIFluxx" />
+          <span>Starter Console</span>
+        </div>
+        <nav>
+          <p className="nav-group">Console</p>
+          {TABS.map((t) => <button key={t} className={t === tab ? "active" : ""} onClick={() => setTab(t)}>{t}</button>)}
+        </nav>
+        <footer>AIFluxx Starter Console v0.1 · Questions: <a href="mailto:developer@aifluxx.com">developer@aifluxx.com</a></footer>
+      </aside>
+      <div className="content">
+        <header className="topbar">
+          <span>Starter Console</span><span className="sep">/</span><span className="here">{tab}</span>
+          {cfg?.mock && <span className="mock">MOCK</span>}
+        </header>
+        <main>
+          {!cfg && <div className="error">Local proxy not reachable. Start it with <code>npm run dev</code>.</div>}
+          {tab === "Run" && <RunConsole agents={agents} runs={runs} onRun={onRun} mock={!!cfg?.mock} />}
+          {tab === "Status" && <Status agents={agents} runs={runs} error={agentsErr} reload={loadAgents} />}
+          {tab === "Tools" && <Tools />}
+          {tab === "Settings" && cfg && <Settings cfg={cfg} />}
+        </main>
+      </div>
     </div>
   );
 }
